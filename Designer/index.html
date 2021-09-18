@@ -10,7 +10,7 @@
     <title>API Designer</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="designer.css" rel="stylesheet">
@@ -23,7 +23,7 @@
         <li class="nav-item text-nowrap">
           <a class="nav-link" href="#">Sign out</a>
         </li>
-      </ul>--->
+      </ul>-->
     </nav>
 
     <div class="container-fluid">
@@ -33,7 +33,7 @@
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                 <span>Calls</span>
             </h6>
-            <ul class="nav flex-column">
+            <ul class="nav flex-column" id="CallsMenu">
               <li class="nav-item">
                 <a class="nav-link" href="#">
                   [GET] /users/
@@ -86,7 +86,41 @@
         </nav>
 
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+          <div id="CallsCreateForm" >
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+              <h2>Create new call</h2>            
+            </div>
+
+            <div class="input-group">
+              <select class="form-control" id="CallsCreateFormMethod">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+              </select>
+              <input type="text" class="form-control" id="CallsCreateFormURL" placeholder="/" />
+              <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" id="CallsCreateFormSave" type="button">Save</button>
+                </div>
+            </div>
+
+            <br />
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="true" id="CallsCreateFormAuthentification">
+              <label class="form-check-label" for="CallsCreateFormAuthentification">
+                  Required Authentification header
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="true" id="CallsCreateFormAuthorization">
+              <label class="form-check-label" for="CallsCreateFormAuthorization">
+                  Required Authorization (permission check)
+              </label>
+            </div>
+            </div>
+
+          <!--<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h2>Call edit</h2>            
           </div>
 
@@ -220,7 +254,7 @@
                     </tr>
                     </tbody>
                 </table>
-            </div>
+            </div>-->
 
             <!--<h4>Errors</h4>
 
@@ -281,13 +315,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="dist/js/bootstrap.min.js"></script>
-
-    <!-- Icons -->
-    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-    <script>
-      feather.replace()
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 
     <!-- Graphs -->
     
@@ -300,6 +328,33 @@
           result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
+      }
+
+      function CheckboxValue(elm){
+        if(!elm){
+          return false;
+        }
+        return (elm.checked);
+      }
+
+      function SelectValue(elm, def){
+        if(!elm){
+          return def;
+        }
+
+        if(!elm.selectedIndex){
+          return def;
+        }
+
+        if(!elm.options){
+          return def;
+        }
+
+        if(!elm.options[elm.selectedIndex]){
+          return def;
+        }
+
+        return elm.options[elm.selectedIndex].value;
       }
 
       function CustomEvent(name, data){
@@ -452,6 +507,8 @@
         self.calls[api_call.id] = api_call;
 
         self._onCallsChange();
+
+        return api_call.id;
       }
 
       APIDesigner.GetCalls = function(){
@@ -464,6 +521,15 @@
         }
 
         return calls;
+      }
+
+      APIDesigner.GetCall = function(id){
+        var self = this;
+        if(!self.calls[id]){
+          return null;
+        }
+
+        return self.calls[id];
       }
 
       APIDesigner.AddEventListener = function(name, callback){
@@ -489,6 +555,97 @@
       APIDesigner.AddEventListener("OnCallsChange", function(event){
         console.log(event);
       });
+
+
+      APIDesignerView = {};
+
+      APIDesignerView.designer = APIDesigner;
+      APIDesignerView.call_menu_element = document.getElementById("CallsMenu");
+
+      //create form
+      APIDesignerView.call_create_form_element = document.getElementById("CallsCreateForm");
+      APIDesignerView.call_create_form_method_element = document.getElementById("CallsCreateFormMethod");
+      APIDesignerView.call_create_form_url_element = document.getElementById("CallsCreateFormURL");
+      APIDesignerView.call_create_form_save_element = document.getElementById("CallsCreateFormSave");
+      APIDesignerView.call_create_form_authentificaton_element = document.getElementById("CallsCreateFormAuthentification");
+      APIDesignerView.call_create_form_authorization_element = document.getElementById("CallsCreateFormAuthorization");
+
+      APIDesignerView.Init = function(){
+        var self = this;
+
+        self.designer.AddEventListener("OnCallsChange", function(event){
+          self.DrawCallsMenu(event.data);
+        });
+
+        self.designer._onCallsChange();
+
+        //create form
+        self.call_create_form_element.style.display = 'none';
+        self.call_create_form_save_element.onclick = function(){
+          self.CallsCreateFormSave();
+        }
+      }
+
+      APIDesignerView.DrawCallsMenu = function(call_list){
+        var self = this;
+        var source = '';
+
+        for(var i in call_list){
+          var call_item = call_list[i];
+          source += self.DrawCallsMenuItem(call_item);
+        }
+
+        source += '<li class="nav-item">'+"\n";
+        source += '  <a class="nav-link" href="javascript: APIDesignerView.CallsCreateForm();">'+"\n";
+        source += '   Create new call'+"\n";
+        source += '  </a>'+"\n";
+        source += '</li>'+"\n";
+
+        if(self.call_menu_element){
+          self.call_menu_element.innerHTML = source;
+        }
+      }
+
+      APIDesignerView.DrawCallsMenuItem = function(call_item){
+        var source = '<li class="nav-item">'+"\n";
+        source += '  <a class="nav-link" href="javascript: APIDesignerView.CallsEditForm(\''+call_item.id+'\');">'+"\n";
+        source += '   ['+call_item.method+'] '+call_item.url+"\n";
+        source += '  </a>'+"\n";
+        source += '</li>'+"\n";
+
+        return source;
+      }
+
+      APIDesignerView.CallsCreateForm = function(){
+        //show create form
+        var self = this;
+
+        //todo reset values
+
+        self.call_create_form_element.style.display = 'block';
+      }
+      APIDesignerView.CallsCreateFormSave = function(){
+        var self = this;
+
+        //get values
+        var method = SelectValue(self.call_create_form_method_element, "GET");
+        var url = self.call_create_form_url_element.value;
+
+        //create call
+        var call_id = self.designer.CreateCall(method, url);
+        var call = self.designer.GetCall(call_id);
+
+        if(call){
+          //set checkbox values - TODO use setters (setting value should generate 401 or 403 errors posibility)
+          self.designer.GetCall(call_id).need_authentification = CheckboxValue(self.call_create_form_authentificaton_element);
+          self.designer.GetCall(call_id).need_authorization = CheckboxValue(self.call_create_form_authorization_element);
+
+          //TODO: close create form, open edit form
+        }        
+      }
+
+
+      APIDesignerView.Init();
 
     </script>
   </body>
