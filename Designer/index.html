@@ -34,41 +34,13 @@
                 <span>Calls</span>
             </h6>
             <ul class="nav flex-column" id="CallsMenu">
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  [GET] /users/
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                   [POST] /users/
-                </a>
-              </li>
               
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <span data-feather="plus-circle"></span> Create new call
-                </a>
-              </li>
             </ul>
 
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                 <span>Actions</span>
             </h6>
             <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        ReLoad
-                    </a>
-                </li>
-    
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        Save
-                    </a>
-                </li>
-
                 <li class="nav-item">
                     <a class="nav-link" href="#">
                         Import JSON
@@ -92,12 +64,15 @@
             </div>
 
             <div class="input-group">
-              <select class="form-control" id="CallsCreateFormMethod">
+              <div class="input-group-prepend">
+                <select class="form-control" id="CallsCreateFormMethod">
                   <option value="GET">GET</option>
                   <option value="POST">POST</option>
                   <option value="PUT">PUT</option>
                   <option value="DELETE">DELETE</option>
-              </select>
+                </select>
+              </div>
+              
               <input type="text" class="form-control" id="CallsCreateFormURL" placeholder="/" />
               <div class="input-group-append">
                   <button class="btn btn-outline-secondary" id="CallsCreateFormSave" type="button">Save</button>
@@ -108,7 +83,7 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="true" id="CallsCreateFormAuthentification">
               <label class="form-check-label" for="CallsCreateFormAuthentification">
-                  Required Authentification header
+                  Required Authentification 
               </label>
             </div>
 
@@ -118,38 +93,45 @@
                   Required Authorization (permission check)
               </label>
             </div>
+          </div>
+
+          <div id="CallsUpdateForm" >
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+              <h2>Update call</h2>            
             </div>
 
-          <!--<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h2>Call edit</h2>            
-          </div>
+            <input type="hidden" id="CallsUpdateFormId" value="0" />
 
-          <div class="input-group">
-            <select class="form-control" id="callEditMethod">
-                <option>GET</option>
-                <option>POST</option>
-                <option>PUT</option>
-                <option>DELETE</option>
-            </select>
-            <input type="text" class="form-control" placeholder="/" />
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button">Save</button>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <select class="form-control" id="CallsUpdateFormMethod">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
               </div>
-          </div>
-          <br />
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="true" id="defaultCheck1">
-            <label class="form-check-label" for="defaultCheck1">
-                Required Authentification header
-            </label>
-          </div>
+              
+              <input type="text" class="form-control" id="CallsUpdateFormURL" placeholder="/" />
+              <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" id="CallsUpdateFormSave" type="button">Save</button>
+                </div>
+            </div>
 
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="true" id="defaultCheck1">
-            <label class="form-check-label" for="defaultCheck1">
-                Required Authorization (permission check)
-            </label>
-          </div>
+            <br />
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="true" id="CallsUpdateFormAuthentification">
+              <label class="form-check-label" for="CallsUpdateFormAuthentification">
+                  Required Authentification header
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="true" id="CallsUpdateFormAuthorization">
+              <label class="form-check-label" for="CallsUpdateFormAuthorization">
+                  Required Authorization (permission check)
+              </label>
+            </div>
 
             <br /><br />
 
@@ -158,36 +140,47 @@
 
 
             <div class="table-responsive">
-                <table class="table table-striped table-sm">
+              <table class="table table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="CallsUpdateUrlParams">
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Data <small>(GET or POST based on method)</small></h4>
+
+
+            <div class="table-responsive">
+              <table class="table table-striped table-sm">
                   <thead>
-                    <tr>
+                  <tr>
                       <th>Name</th>
                       <th>Type</th>
                       <th>Description</th>
+                      <th>Required</th>
                       <th></th>
-                    </tr>
+                      <th></th>
+                  </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                       <td><input type="text" class="form-control" placeholder="Field description" value="user_id" readonly="true" /></td>
-                       <td><select class="form-control">
-                            <option>String</option>
-                            <option>Text</option>
-                            <option>Integer</option>
-                            <option>Float</option>
-                            <option>Date</option>
-                            <option>Datetime</option>
-                            <option>Time</option>
-                        </select></td>
-                       <td><input type="text" class="form-control" placeholder="Field description" value="User ID" /></td>
-                       <td><button class="btn btn-outline-secondary" type="button">Save</button></td>
-                    </tr>
+                  <tbody id="CallsUpdateUrlParams">
                   </tbody>
                 </table>
               </div>
+          </div>
+
+          
 
 
-             <h4>Data <small>(GET or POST based on method)</small></h4>
+          <!--
+
+
 
             <div class="table-responsive">
                 <table class="table table-striped table-sm">
@@ -330,14 +323,18 @@
         return result;
       }
 
-      function CheckboxValue(elm){
+      function CheckboxGetValue(elm){
         if(!elm){
           return false;
         }
         return (elm.checked);
       }
 
-      function SelectValue(elm, def){
+      function CheckboxSetValue(elm, val){
+        elm.checked = val;
+      }
+
+      function SelectGetValue(elm, def){
         if(!elm){
           return def;
         }
@@ -356,6 +353,16 @@
 
         return elm.options[elm.selectedIndex].value;
       }
+
+      function SelectSetValue(elm, val){
+        if(!elm){
+          return def;
+        }
+
+        elm.value = val;
+      }
+
+
 
       function CustomEvent(name, data){
         var self = this;
@@ -400,12 +407,14 @@
 
       function APIURLParam(name){
         var self = this;
+        self.id = makeid(8);
 
         self.name = name;
         self.type = "string";
         self.description = "";
       }
 
+      APIURLParam.prototype.id = 0;
       APIURLParam.prototype.name = "";
       APIURLParam.prototype.type = "";
       APIURLParam.prototype.description = "";
@@ -429,7 +438,7 @@
         self.id = makeid(16);
 
         self.method = method;
-        self.url_params = [];
+        self.url_params = {};
         self.data = [];
         self.SetUrl(url);
         self.need_authentification = false;
@@ -458,6 +467,12 @@
         return data;
       }
 
+      APICall.prototype.SetMethod = function(method){
+        var self = this;
+
+        self.method = method;
+      }
+
       APICall.prototype.SetUrl = function(url){
         var self = this;
         //parse url params
@@ -466,16 +481,17 @@
       
         var mt = match.next();
 
-        //TODO: remove not used url_params
+        //remove not used url_params
+        var touched = [];
 
         while(!mt.done){
-          var name = mt.value.groups.name;
-          
+          var name = mt.value.groups.name;               
 
           //check if already exists
           var exists = false;
           for(var i in self.url_params){
             if(self.url_params[i].name == name){
+              touched.push(self.url_params[i].id);
               exists = true;
               continue;
             }
@@ -483,10 +499,21 @@
 
           //add to params list
           if(!exists){
-            self.url_params.push(new APIURLParam(name));
-          }     
+            var url_param = new APIURLParam(name);
+            self.url_params[url_param.id] = url_param;
+            touched.push(url_param.id);
+          }  
 
           mt = match.next();     
+        }
+
+        for(var i in self.url_params){
+          var url_param = self.url_params[i];
+
+          //not in touched -> to remove
+          if(touched.indexOf(url_param.id) == -1){
+            delete(self.url_params[i]);
+          }
         }
 
         self.url = url;
@@ -500,6 +527,10 @@
       APIDesigner.calls = {};
 
       APIDesigner.eventConroller = new CustomEventsController();
+
+      APIDesigner.types = [
+        "String", "Text", "Integer", "Float"
+      ];
 
       APIDesigner.CreateCall = function(method, url){
         var self = this;
@@ -570,6 +601,17 @@
       APIDesignerView.call_create_form_authentificaton_element = document.getElementById("CallsCreateFormAuthentification");
       APIDesignerView.call_create_form_authorization_element = document.getElementById("CallsCreateFormAuthorization");
 
+      //update form
+      APIDesignerView.call_update_form_element = document.getElementById("CallsUpdateForm");
+      APIDesignerView.call_update_form_id_element = document.getElementById("CallsUpdateFormId");
+      APIDesignerView.call_update_form_method_element = document.getElementById("CallsUpdateFormMethod");
+      APIDesignerView.call_update_form_url_element = document.getElementById("CallsUpdateFormURL");
+      APIDesignerView.call_update_form_save_element = document.getElementById("CallsUpdateFormSave");
+      APIDesignerView.call_update_form_authentificaton_element = document.getElementById("CallsUpdateFormAuthentification");
+      APIDesignerView.call_update_form_authorization_element = document.getElementById("CallsUpdateFormAuthorization");
+
+      APIDesignerView.call_update_url_params = document.getElementById("CallsUpdateUrlParams");
+
       APIDesignerView.Init = function(){
         var self = this;
 
@@ -578,12 +620,26 @@
         });
 
         self.designer._onCallsChange();
+        self.HideScreens();
 
         //create form
-        self.call_create_form_element.style.display = 'none';
+        
         self.call_create_form_save_element.onclick = function(){
           self.CallsCreateFormSave();
         }
+
+        
+        self.call_update_form_save_element.onclick = function(){
+          self.CallsUpdateFormSave();
+        }
+
+        console.log("init finished");
+      }
+
+      APIDesignerView.HideScreens = function(){
+        var self = this;
+        self.call_update_form_element.style.display = 'none';
+        self.call_create_form_element.style.display = 'none';
       }
 
       APIDesignerView.DrawCallsMenu = function(call_list){
@@ -608,7 +664,7 @@
 
       APIDesignerView.DrawCallsMenuItem = function(call_item){
         var source = '<li class="nav-item">'+"\n";
-        source += '  <a class="nav-link" href="javascript: APIDesignerView.CallsEditForm(\''+call_item.id+'\');">'+"\n";
+        source += '  <a class="nav-link" href="javascript: APIDesignerView.CallsUpdateForm(\''+call_item.id+'\');">'+"\n";
         source += '   ['+call_item.method+'] '+call_item.url+"\n";
         source += '  </a>'+"\n";
         source += '</li>'+"\n";
@@ -616,19 +672,53 @@
         return source;
       }
 
+      APIDesignerView.DrawCallUpdateUrlParams = function(call_id, url_params){
+        var self = this;
+        var source = '';
+
+        for(var i in url_params){
+          var url_param = url_params[i];
+          source += self.DrawCallUpdateUrlParamsItem(call_id, url_param);
+        }
+
+        self.call_update_url_params.innerHTML = source;
+      }
+
+      APIDesignerView.DrawCallUpdateUrlParamsItem = function(call_id, url_param){
+        var self = this;
+        var source = '';
+
+        source += '<tr>'+"\n";
+        source += ' <td><input type="text" class="form-control" id="CallsUpdateUrlParamsName_'+url_param.id+'" value="'+url_param.name+'" readonly="true" /></td>'+"\n";
+        source += ' <td><select class="form-control" id="CallsUpdateUrlParamsType_'+url_param.id+'">'+"\n";
+
+        for(var i in self.designer.types){
+          source += '   <option value="'+self.designer.types[i]+'" '+((self.designer.types[i]==url_param.type)?' selected="selected"':'')+'>'+self.designer.types[i]+'</option>'+"\n";
+        }
+        source += '  </select></td>'+"\n";
+        source += ' <td><input type="text" class="form-control" id="CallsUpdateUrlParamsDesc_'+url_param.id+'" placeholder="Field description" value="'+url_param.description+'" /></td>'+"\n";
+        source += ' <td><a class="btn btn-outline-secondary" href="javascript:APIDesignerView.CallEditUrlParamSave(\''+call_id+'\',\''+url_param.id+'\')">Save</a></td>'+"\n";
+        source += '</tr>'+"\n";
+
+
+        return source;
+      }
+
       APIDesignerView.CallsCreateForm = function(){
         //show create form
         var self = this;
+        self.HideScreens();
 
         //todo reset values
 
         self.call_create_form_element.style.display = 'block';
       }
+
       APIDesignerView.CallsCreateFormSave = function(){
         var self = this;
 
         //get values
-        var method = SelectValue(self.call_create_form_method_element, "GET");
+        var method = SelectGetValue(self.call_create_form_method_element, "GET");
         var url = self.call_create_form_url_element.value;
 
         //create call
@@ -637,11 +727,93 @@
 
         if(call){
           //set checkbox values - TODO use setters (setting value should generate 401 or 403 errors posibility)
-          self.designer.GetCall(call_id).need_authentification = CheckboxValue(self.call_create_form_authentificaton_element);
-          self.designer.GetCall(call_id).need_authorization = CheckboxValue(self.call_create_form_authorization_element);
+          call.need_authentification = CheckboxGetValue(self.call_create_form_authentificaton_element);
+          call.need_authorization = CheckboxGetValue(self.call_create_form_authorization_element);
 
-          //TODO: close create form, open edit form
+          //close create form, open edit form
+
+          self.designer._onCallsChange();
+          self.CallsUpdateForm(call_id);
         }        
+      }
+
+      APIDesignerView.CallsUpdateForm = function(call_id){
+        var self = this;
+        self.HideScreens();
+
+        //get call
+        var call = self.designer.GetCall(call_id);
+
+        if(!call){
+          //show error
+
+          return null;
+        }
+
+        //set values
+        self.call_update_form_id_element.value = call_id;
+        self.call_update_form_url_element.value = call.url;
+        SelectSetValue(self.call_update_form_method_element, call.method);
+        CheckboxSetValue(self.call_update_form_authentificaton_element, call.need_authentification);
+        CheckboxSetValue(self.call_update_form_authorization_element, call.need_authorization);
+
+        //draw url params
+        self.DrawCallUpdateUrlParams(call_id, call.url_params);
+
+
+        //show block
+        self.call_update_form_element.style.display = 'block';
+        
+      }
+
+      APIDesignerView.CallsUpdateFormSave = function(){
+        var self = this;
+
+        //get id
+        var call_id = self.call_update_form_id_element.value;
+        var call = self.designer.GetCall(call_id);
+
+        if(call){
+          //get values
+          var method = SelectGetValue(self.call_update_form_method_element, "GET");
+          var url = self.call_update_form_url_element.value;
+
+          //set values
+          call.SetUrl(url);
+          call.SetMethod(method);
+        
+          //set checkbox values - TODO use setters (setting value should generate 401 or 403 errors posibility)
+          call.need_authentification = CheckboxGetValue(self.call_update_form_authentificaton_element);
+          call.need_authorization = CheckboxGetValue(self.call_update_form_authorization_element);
+
+          self.designer._onCallsChange();
+
+          //reopen edit form
+          self.CallsUpdateForm(call_id);
+        }        
+      }
+
+      APIDesignerView.CallEditUrlParamSave = function(call_id, param_id){
+        var self = this;
+
+        var call = self.designer.GetCall(call_id);
+
+        if(!call){
+          return null;
+        }
+
+        if(!call.url_params[param_id]){
+          return null;
+        }
+
+        var type_elm = document.getElementById("CallsUpdateUrlParamsType_"+param_id);
+        var type = SelectGetValue(type_elm, "String");
+        var description = document.getElementById("CallsUpdateUrlParamsDesc_"+param_id).value;
+
+        call.url_params[param_id].type = type;
+        call.url_params[param_id].description = description;
+
+        self.DrawCallUpdateUrlParams(call_id, call.url_params);
       }
 
 
