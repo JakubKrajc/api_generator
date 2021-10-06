@@ -41,13 +41,14 @@
             </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        Import JSON
+                    <a class="nav-link" href="javascript:APIDesignerView.ShowFileOpenDialog()">
+                        Import JSON                        
                     </a>
+                    <input type="file" id="inputFile" style="position: absolute; top:-100px;"/>
                 </li>
                 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link" href="javascript:APIDesignerView.Export();">
                         Export JSON
                     </a>
                 </li>
@@ -420,6 +421,30 @@
         self.description = desc;
       }
 
+      APIURLParam.prototype.AsObj = function(){
+        var self = this;
+
+        var data = {
+          id: self.id,
+          name: self.name,
+          type: self.type,
+          description: self.description
+        };
+        
+        return data;
+      }
+
+      APIURLParam.FromObj = function(data_obj){
+        var param = new APIURLParam(data_obj.name);
+
+        param.id = data_obj.id;
+        param.name = data_obj.name;
+        param.type = data_obj.type;
+        param.description = data_obj.description;
+
+        return param;
+      }
+
 
       function APIDataField(name){
         var self = this;
@@ -461,6 +486,32 @@
         self.description = desc;
       }
 
+      APIDataField.prototype.AsObj = function(){
+        var self = this;
+
+        var data = {
+          id: self.id,
+          name: self.name,
+          type: self.type,
+          reqired: self.reqired,
+          description: self.description
+        };
+        
+        return data;
+      }
+
+      APIDataField.FromObj = function(data_obj){
+        var field = new APIDataField(data_obj.name);
+
+        field.id = data_obj.id;
+        field.name = data_obj.name;
+        field.type = data_obj.type;
+        field.reqired = data_obj.reqired;
+        field.description = data_obj.description;
+
+        return field;
+      }
+
 
       function APICall(method, url){
         var self = this;
@@ -483,6 +534,8 @@
       APICall.prototype.need_authorization = false;
       APICall.prototype.url_params = {};
       APICall.prototype.data_fields = {};
+
+     
 
       APICall.prototype.GetListData = function(){
         
@@ -591,6 +644,60 @@
         self.url = url;
       }
 
+      //static
+      APICall.FromObj = function(data_obj){
+        var call = new APICall(data_obj.method, data_obj.url);
+        call.id = data_obj.id;
+        call.url = data_obj.url;
+        call.method = data_obj.method;
+        call.need_authentification = data_obj.need_authentification;
+        call.need_authorization = data_obj.need_authorization;
+
+        call.url_params = {};
+        call.data_fields = {};
+
+        for(var i in data_obj.url_params){
+          var param_data = data_obj.url_params[i];
+
+          var param = APIURLParam.FromObj(param_data);
+          call.url_params[param.id] = param;
+        }
+
+        for(var i in data_obj.data_fields){
+          var field_data = data_obj.data_fields[i];
+
+          var field = APIDataField.FromObj(field_data);
+          call.data_fields[field.id] = field;
+        }
+
+        return call;
+      }
+
+      APICall.prototype.AsObj = function(){
+        var self = this;
+
+        var data = {
+          id: self.id,
+          url: self.url,
+          method: self.method,
+          need_authentification: self.need_authentification,
+          need_authorization: self.need_authorization,
+          url_params: [],
+          data_fields: []
+        };
+
+        for(var i in self.url_params){
+          data.url_params.push(self.url_params[i].AsObj());
+        }
+
+        for(var i in self.data_fields){
+          data.data_fields.push(self.data_fields[i].AsObj());
+        }
+
+        return data;
+      }
+
+
       var APIDesigner = {};
       APIDesigner.calls = {};
       APIDesigner.eventConroller = new CustomEventsController();
@@ -630,6 +737,66 @@
         return self.calls[id];
       }
 
+      APIDesigner.AsObj = function(){
+        var self = this;
+
+        var data = {
+          calls:[]
+        }
+
+        for(var i in self.calls){
+          data.calls.push(self.calls[i].AsObj())
+        }
+        return data;
+      }
+
+
+      APIDesigner.FromObj = function(data){
+        var self = this;
+
+        //console.log(data);
+
+        //delete(self.calls);
+
+        self.calls = {};
+
+        //console.log(self.calls);
+
+        if(!data){
+          return;
+        }
+
+        if(!data.calls){
+          return;
+        }
+
+        for(var i in data.calls){
+          var call_data = data.calls[i];
+          var call = APICall.FromObj(call_data);
+          self.calls[call.id] = call;
+        }
+      }
+
+      APIDesigner.SaveToLocalStorage = function(){
+        var self = this;
+
+        var data = self.AsObj();
+
+        console.log(data);
+        window.localStorage.setItem('data', JSON.stringify(data));        
+      }
+
+      APIDesigner.LoadFromLocalStorage = function(){
+        var self = this;
+
+        var data_str = window.localStorage.getItem('data', 'null');
+        var data = JSON.parse(data_str);
+
+        console.log(data);
+        
+        self.FromObj(data);        
+      }
+
 
       APIDesigner.AddEventListener = function(name, callback){
         var self = this;
@@ -641,7 +808,9 @@
       APIDesigner._onCallsChange = function(){
         var self = this;
         var calls = self.GetCalls();
-        console.log("OnCallsChange");
+
+        //save to local storage
+        var data = self.SaveToLocalStorage();
 
         //call event ??
         var event = new CustomEvent("OnCallsChange", calls);
@@ -680,6 +849,8 @@
         self.designer.AddEventListener("OnCallsChange", function(event){
           self.DrawCallsMenu(event.data);
         });
+
+        self.designer.LoadFromLocalStorage();
 
         self.designer._onCallsChange();
         self.HideScreens();
@@ -794,7 +965,7 @@
         var source = '';
 
         source += '<tr>'+"\n";
-        source += ' <td><input type="text" class="form-control" id="CallsUpdateDataFieldName_'+data_field.id+'" value="'+data_field.name+'" readonly="true" /></td>'+"\n";
+        source += ' <td><input type="text" class="form-control" id="CallsUpdateDataFieldName_'+data_field.id+'" value="'+data_field.name+'"/></td>'+"\n";
         source += ' <td><select class="form-control" id="CallsUpdateDataFieldType_'+data_field.id+'">'+"\n";
 
         for(var i in self.designer.types){
@@ -982,8 +1153,45 @@
         self.DrawCallUpdateDataFields(call_id, call.data_fields);
       }
 
+      APIDesignerView.ShowFileOpenDialog = function(){
+        document.getElementById("inputFile").click();
+      }
+
+      APIDesignerView.Export = function(){
+        var self = this;
+
+        var str_to_save = JSON.stringify(self.designer.AsObj(), null, 2);
+
+        var hiddenElement = document.createElement('a');
+
+        hiddenElement.href = 'data:attachment/text,' + encodeURI(str_to_save);
+        hiddenElement.target = '_blank';
+        //todo: named project
+        hiddenElement.download = 'api_project.json';
+        hiddenElement.click();
+      }
+
 
       APIDesignerView.Init();
+
+
+      document.getElementById('inputFile').onchange = function() {
+        //get file contents
+
+        var file = document.getElementById("inputFile").files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function (evt) {
+              var data_obj = JSON.parse(evt.target.result);
+
+              APIDesigner.FromObj(data_obj);
+            }
+            reader.onerror = function (evt) {
+              console.log("error reading file");
+            }
+        }
+      };
 
     </script>
   </body>
