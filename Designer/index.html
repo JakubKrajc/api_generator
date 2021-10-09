@@ -716,6 +716,8 @@
         return api_call.id;
       }
 
+      APIDesigner.project_file = "project_file";
+
       APIDesigner.GetCalls = function(){
         var self = this;
 
@@ -1167,7 +1169,7 @@
         hiddenElement.href = 'data:attachment/text,' + encodeURI(str_to_save);
         hiddenElement.target = '_blank';
         //todo: named project
-        hiddenElement.download = 'api_project.json';
+        hiddenElement.download = self.designer.project_file+'.json';
         hiddenElement.click();
       }
 
